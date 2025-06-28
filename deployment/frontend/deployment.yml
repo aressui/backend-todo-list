@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: practice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-todo
+  template:
+    metadata:
+      labels:
+        app: frontend-todo
+    spec:
+      containers:
+      - name: frontend-todo
+        image: ghcr.io/aressui/testapp-front:1.0
+        ports:
+        - containerPort: 80
+        env:
+        - name: BACKEND_HOST
+          value: backend-todo.practice.svc.cluster.local
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/nginx.conf # <-- ОСТАЕТСЯ ТАК
+          # subPath: nginx.conf # <-- УДАЛИТЕ ЭТУ СТРОКУ!
+          readOnly: true
+      volumes:
+      - name: nginx-config-volume
+        configMap:
+          name: frontend-nginx-config
+          items: # <-- ДОБАВЬТЕ ЭТУ СЕКЦИЮ!
+          - key: nginx.conf # <-- Укажите, какой ключ из ConfigMap монтировать
+            path: nginx.conf # <-- Укажите, как он будет называться в томе
+      imagePullSecrets:
+      - name: ghcr-pull-secret
