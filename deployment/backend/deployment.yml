@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-todo
+  namespace: practice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-todo
+  template:
+    metadata:
+      labels:
+        app: backend-todo
+    spec:
+      containers:
+        - name: backend-todo
+          image: ghcr.io/aressui/testapp:1.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: do
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres.practice.svc.cluster.local:5432/todo_list
+            - name: SPRING_DATASOURCE_USERNAME
+              value: program
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: test
+      imagePullSecrets:
+      - name: ghcr-pull-secret
